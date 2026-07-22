@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upper/Lower Protocol — Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161a; --bg-raised:#1c1f24; --bg-card:#20242a;
+    --line:#2c3038; --line-soft:#24272d;
+    --text:#edeef0; --text-dim:#9a9fa8; --text-faint:#5f636c;
+    --steel:#5aa9d6; --steel-dim:#3d6f8c;
+    --ember:#e2632f; --green:#7fbf8f; --brass:#c9a04e;
+    --font-display:'Oswald',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html, body{ height:100%; }
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--font-body); line-height:1.5;
+    -webkit-font-smoothing:antialiased; display:flex; align-items:center; justify-content:center;
+    padding: 32px 20px;
+  }
+  .wrap{ max-width:880px; width:100%; }
+
+  .eyebrow{ font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:10px; margin-bottom:16px; justify-content:center; }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--ember); }
+  h1{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(30px,5.5vw,50px);
+    letter-spacing:-0.01em; text-transform:uppercase; text-align:center; line-height:1.05;
+  }
+  h1 span{ color:var(--steel); }
+  .sub{ margin:16px auto 0; max-width:520px; color:var(--text-dim); font-size:14.5px; text-align:center; }
+
+  .equip-strip{ display:flex; gap:10px; margin:26px 0 46px; flex-wrap:wrap; justify-content:center; }
+  .equip-strip span{
+    font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--brass);
+    border:1px solid rgba(201,160,78,0.35); background:rgba(201,160,78,0.07); padding:5px 11px;
+  }
+
+  .nav-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:640px){ .nav-grid{ grid-template-columns:1fr; } }
+
+  .nav-card{
+    display:block; text-decoration:none; color:inherit;
+    border:1px solid var(--line); background:var(--bg-card);
+    padding:30px 28px; position:relative; overflow:hidden;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .nav-card:hover{ border-color:var(--steel-dim); transform: translateY(-2px); }
+  .nav-card.b:hover{ border-color:var(--ember); }
+  .nav-card::before{
+    content:""; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--steel);
+  }
+  .nav-card.b::before{ background:var(--ember); }
+
+  .nav-tag{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--steel); }
+  .nav-card.b .nav-tag{ color:var(--ember); }
+  .nav-title{ font-family:var(--font-display); font-size:24px; text-transform:uppercase; letter-spacing:.01em; margin-top:10px; }
+  .nav-desc{ font-size:13.5px; color:var(--text-dim); margin-top:10px; line-height:1.55; }
+  .nav-arrow{ font-family:var(--font-mono); font-size:12px; color:var(--text-faint); margin-top:20px; display:flex; align-items:center; gap:6px; }
+  .nav-card:hover .nav-arrow{ color:var(--steel); }
+  .nav-card.b:hover .nav-arrow{ color:var(--ember); }
+
+  .footnote{ margin-top:44px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--text-faint); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>8-Week Cycle — Home Equipment Build</div>
+  <h1>Upper <span>/</span> Lower<br>Protocol</h1>
+  <p class="sub">Everything for the cycle lives in these two pages. Bookmark this file — it links straight to the plan and the log, both of which work fully offline once downloaded.</p>
+
+  <div class="equip-strip">
+    <span>Adjustable DBs — 25kg / hand</span>
+    <span>Resistance Bands</span>
+    <span>Flat/Incline Bench</span>
+  </div>
+
+  <div class="nav-grid">
+    <a class="nav-card" href="training-protocol.html">
+      <div class="nav-tag">Reference</div>
+      <div class="nav-title">The Protocol</div>
+      <div class="nav-desc">All 4 days, exercise by exercise — openers, set/rep contrast scheme, RPE, rest, and the double-progression tracking rule.</div>
+      <div class="nav-arrow">Open Protocol →</div>
+    </a>
+    <a class="nav-card b" href="training-logbook.html">
+      <div class="nav-tag">Tracker</div>
+      <div class="nav-title">The Log Book</div>
+      <div class="nav-desc">Log kg, reps, and sets per exercise. Auto-totals by exercise, by day, by 4-day cycle, and a running all-time total. Saves offline, exports to CSV.</div>
+      <div class="nav-arrow">Open Log Book →</div>
+    </a>
+  </div>
+
+  <div class="footnote">Keep all three files in the same folder when you save them, so the links between pages keep working offline.</div>
+</div>
+</body>
+</html>
