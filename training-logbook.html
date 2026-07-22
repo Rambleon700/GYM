@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Log Book — KG Lifted Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161a; --bg-raised:#1c1f24; --bg-card:#20242a;
+    --line:#2c3038; --line-soft:#24272d;
+    --text:#edeef0; --text-dim:#9a9fa8; --text-faint:#5f636c;
+    --steel:#5aa9d6; --steel-dim:#3d6f8c;
+    --ember:#e2632f; --green:#7fbf8f; --brass:#c9a04e;
+    --font-display:'Oswald',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--text); font-family:var(--font-body); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 24px 100px; }
+
+  .hero{ border-bottom:1px solid var(--line); padding:48px 0 36px; position:relative; }
+  .hero::before{ content:""; position:absolute; top:0; left:50%; transform:translateX(-50%); width:100vw; height:100%;
+    background: radial-gradient(ellipse 700px 300px at 15% 0%, rgba(90,169,214,0.10), transparent 60%),
+                radial-gradient(ellipse 700px 300px at 85% 100%, rgba(226,99,47,0.10), transparent 60%);
+    z-index:-1; }
+  .eyebrow{ font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--ember); }
+  .hero h1{ font-family:var(--font-display); font-weight:700; font-size:clamp(30px,5vw,48px); letter-spacing:-0.01em; text-transform:uppercase; }
+  .hero h1 span{ color:var(--steel); }
+  .hero p.sub{ margin-top:12px; max-width:600px; color:var(--text-dim); font-size:14.5px; }
+
+  .section-head{ display:flex; align-items:baseline; gap:16px; margin:56px 0 22px; }
+  .section-head h2{ font-family:var(--font-display); font-size:22px; text-transform:uppercase; letter-spacing:.01em; }
+  .section-head .rule{ flex:1; height:1px; background:var(--line); }
+  .section-head .tag{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.1em; }
+
+  /* ============ GRAND TOTAL ============ */
+  .grand{
+    border:1px solid rgba(201,160,78,0.35); background:rgba(201,160,78,0.06);
+    padding:28px 32px; display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  }
+  .grand .label{ font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--brass); }
+  .grand .value{ font-family:var(--font-display); font-size:clamp(34px,5vw,54px); color:var(--text); }
+  .grand .value span{ font-size:0.4em; color:var(--text-dim); font-family:var(--font-mono); text-transform:uppercase; margin-left:8px; }
+
+  /* ============ CARDS ============ */
+  .cards{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  @media (max-width:800px){ .cards{ grid-template-columns:repeat(2,1fr); } }
+  .card{ border:1px solid var(--line); background:var(--bg-card); padding:18px 20px; }
+  .card .day-tag{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--steel); }
+  .card .kg{ font-family:var(--font-display); font-size:28px; margin-top:8px; }
+  .card .kg small{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); text-transform:uppercase; margin-left:6px;}
+  .card .meta{ font-size:11.5px; color:var(--text-faint); margin-top:6px; }
+
+  /* ============ FORM ============ */
+  .panel{ border:1px solid var(--line); background:var(--bg-card); padding:26px 28px; }
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr 1.3fr 90px 80px 80px auto; gap:14px; align-items:end; }
+  @media (max-width:900px){ .form-grid{ grid-template-columns:1fr 1fr; } }
+  .field label{ display:block; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); margin-bottom:6px; }
+  .field input, .field select{
+    width:100%; background:var(--bg-raised); border:1px solid var(--line-soft); color:var(--text);
+    padding:10px 12px; font-family:var(--font-body); font-size:14px; border-radius:2px;
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--steel-dim); }
+  .btn{
+    background:var(--steel); color:#0e1216; border:none; font-family:var(--font-mono); font-size:12px;
+    text-transform:uppercase; letter-spacing:.06em; padding:11px 20px; cursor:pointer; font-weight:600; border-radius:2px;
+    white-space:nowrap;
+  }
+  .btn:hover{ background:#78bce0; }
+  .btn.ghost{ background:transparent; border:1px solid var(--line-soft); color:var(--text-dim); }
+  .btn.ghost:hover{ border-color:var(--ember); color:var(--ember); }
+  .btn.small{ padding:5px 10px; font-size:10.5px; }
+
+  /* ============ TABLES ============ */
+  table{ width:100%; border-collapse:collapse; }
+  thead th{ text-align:left; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); padding:10px 18px 8px; border-bottom:1px solid var(--line-soft); font-weight:500; }
+  tbody td{ padding:12px 18px; border-bottom:1px solid var(--line-soft); font-size:13.5px; vertical-align:middle; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:rgba(255,255,255,0.015); }
+  .tablewrap{ border:1px solid var(--line); background:var(--bg-card); overflow-x:auto; }
+  .num{ font-family:var(--font-mono); }
+  .vol{ color:var(--brass); font-family:var(--font-mono); font-weight:600; }
+  .daytype{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
+  .daytype.upperA{ color:var(--steel); } .daytype.lowerA{ color:var(--green); }
+  .daytype.upperB{ color:var(--ember); } .daytype.lowerB{ color:var(--brass); }
+  .empty{ padding:30px 18px; text-align:center; color:var(--text-faint); font-size:13px; }
+
+  .footnote{ margin-top:56px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--text-faint); max-width:700px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow"><span class="dot"></span>Companion Log — Upper/Lower Protocol</div>
+    <h1>Training Log <span>Book</span></h1>
+    <p class="sub">Log every set: date, exercise, kg, reps. Everything below totals itself — per exercise, per day, per day-type across the whole cycle, and a running lifetime total.</p>
+    <div style="display:flex; gap:12px; margin-top:24px; flex-wrap:wrap; align-items:center;">
+      <button class="btn ghost" id="btnExport">Export CSV Backup</button>
+      <label class="btn ghost" for="inImport" style="cursor:pointer;">Import CSV Backup</label>
+      <input type="file" id="inImport" accept=".csv" style="display:none;">
+      <span id="importMsg" style="font-family:var(--font-mono); font-size:11.5px; color:var(--text-faint);"></span>
+    </div>
+  </div>
+
+  <!-- ================= GRAND TOTAL ================= -->
+  <div class="section-head" style="margin-top:36px;"><h2>Total KG Lifted — All Time</h2><div class="rule"></div></div>
+  <div class="grand">
+    <div>
+      <div class="label">Running Total, Every Set Ever Logged</div>
+      <div class="value" id="grandTotal">0<span>kg</span></div>
+    </div>
+    <div style="text-align:right;">
+      <div class="label" id="grandMeta">0 sets logged</div>
+    </div>
+  </div>
+
+  <!-- ================= DAY-CYCLE TOTALS ================= -->
+  <div class="section-head"><h2>Totals By 4-Day Cycle</h2><div class="rule"></div><div class="tag">All Sessions, Grouped</div></div>
+  <div class="cards" id="dayTypeCards"></div>
+
+  <!-- ================= ENTRY FORM ================= -->
+  <div class="section-head"><h2>Log A Set</h2><div class="rule"></div></div>
+  <div class="panel">
+    <div class="form-grid">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="inDate">
+      </div>
+      <div class="field">
+        <label>Day</label>
+        <select id="inDay">
+          <option value="Upper A">Upper A</option>
+          <option value="Lower A">Lower A</option>
+          <option value="Upper B">Upper B</option>
+          <option value="Lower B">Lower B</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Exercise</label>
+        <select id="inExercise"></select>
+      </div>
+      <div class="field">
+        <label>KG Per Dumbbell</label>
+        <input type="number" id="inKg" step="0.5" min="0" placeholder="20">
+      </div>
+      <div class="field">
+        <label>Reps</label>
+        <input type="number" id="inReps" step="1" min="1" placeholder="6">
+      </div>
+      <div class="field">
+        <label>Sets</label>
+        <input type="number" id="inSets" step="1" min="1" placeholder="3" value="1">
+      </div>
+      <button class="btn" id="btnAdd">Add</button>
+    </div>
+    <div style="margin-top:14px; display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+      <label style="display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em; cursor:pointer;">
+        <input type="checkbox" id="inTwoHands" style="width:15px; height:15px; accent-color: var(--steel);">
+        Two dumbbells (double for total)
+      </label>
+      <div id="volPreview" style="font-family:var(--font-mono); font-size:12px; color:var(--text-faint);"></div>
+    </div>
+    <div class="field" id="customWrap" style="margin-top:14px; display:none; max-width:320px;">
+      <label>Custom Exercise Name</label>
+      <input type="text" id="inCustom" placeholder="e.g. Band Woodchopper">
+    </div>
+  </div>
+
+  <!-- ================= PER EXERCISE ================= -->
+  <div class="section-head"><h2>Totals By Exercise</h2><div class="rule"></div></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Exercise</th><th style="width:110px">Day</th><th style="width:90px">Sets</th><th style="width:120px">Total KG</th><th style="width:120px">Last Logged</th></tr></thead>
+      <tbody id="exerciseBody"><tr><td class="empty" colspan="5">No sets logged yet.</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ================= PER DAY ================= -->
+  <div class="section-head"><h2>Totals By Day (Date)</h2><div class="rule"></div></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th style="width:130px">Date</th><th style="width:110px">Day Type</th><th style="width:90px">Sets</th><th style="width:120px">Total KG</th></tr></thead>
+      <tbody id="dateBody"><tr><td class="empty" colspan="4">No sets logged yet.</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ================= RAW LOG ================= -->
+  <div class="section-head"><h2>Full Log</h2><div class="rule"></div><div class="tag">Most Recent First</div></div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th style="width:100px">Date</th><th style="width:80px">Day</th><th>Exercise</th><th style="width:80px">KG/Hand</th><th style="width:60px">Hands</th><th style="width:60px">Reps</th><th style="width:55px">Sets</th><th style="width:90px">Total KG</th><th style="width:60px"></th></tr></thead>
+      <tbody id="logBody"><tr><td class="empty" colspan="8">No sets logged yet — add your first set above.</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="footnote">
+    This file saves your log directly in this browser on this device, so it works fully offline once downloaded — no internet or Claude needed. It persists across refreshes and closing the tab, but it's tied to <strong>this browser, this device</strong>: a different browser, a different tablet, or clearing site data/browsing history will not carry it over. Enter the weight of a <strong>single dumbbell</strong> — check "Two dumbbells" if you loaded one in each hand — then reps per set and how many sets you did at that weight. Total for that row is kg × hands × reps × sets. Use <strong>Export CSV Backup</strong> regularly to keep a real file you control, and <strong>Import CSV Backup</strong> to merge it back in on this or any other device.
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const EXERCISES = {
+    "Upper A": ["DB Bench Press","DB Incline Press","Chest-Supported DB Row","Band Chest Fly","Band Lateral Raise","Band Triceps Pressdown","Custom…"],
+    "Lower A": ["DB Romanian Deadlift","Band-Resisted Hip Thrust","DB Single-Leg RDL","Band Lying Leg Curl","DB Standing Calf Raise","Custom…"],
+    "Upper B": ["DB Single-Arm Row","Band Lat Pulldown","DB Seated Shoulder Press","Band Face Pull","DB Hammer Curl","Band Rear-Delt Pull-Apart","Custom…"],
+    "Lower B": ["DB Goblet Squat","DB Bulgarian Split Squat","DB Walking Lunge","Band Leg Extension","Band Pallof Press","Custom…"]
+  };
+  // true = normally loaded with one dumbbell per hand (defaults the "two dumbbells" box to checked)
+  const TWO_HANDS_DEFAULT = {
+    "DB Bench Press": true, "DB Incline Press": true, "Chest-Supported DB Row": true,
+    "Band Chest Fly": false, "Band Lateral Raise": false, "Band Triceps Pressdown": false,
+    "DB Romanian Deadlift": true, "Band-Resisted Hip Thrust": false, "DB Single-Leg RDL": false,
+    "Band Lying Leg Curl": false, "DB Standing Calf Raise": true,
+    "DB Single-Arm Row": false, "Band Lat Pulldown": false, "DB Seated Shoulder Press": true,
+    "Band Face Pull": false, "DB Hammer Curl": true, "Band Rear-Delt Pull-Apart": false,
+    "DB Goblet Squat": false, "DB Bulgarian Split Squat": true, "DB Walking Lunge": true,
+    "Band Leg Extension": false, "Band Pallof Press": false
+  };
+  const DAY_CLASS = {"Upper A":"upperA","Lower A":"lowerA","Upper B":"upperB","Lower B":"lowerB"};
+
+  const $ = (id) => document.getElementById(id);
+  const dateInput = $('inDate'), dayInput = $('inDay'), exInput = $('inExercise'),
+        kgInput = $('inKg'), repsInput = $('inReps'), setsInput = $('inSets'),
+        customWrap = $('customWrap'), customInput = $('inCustom'),
+        twoHandsInput = $('inTwoHands'), volPreview = $('volPreview');
+
+  function todayStr(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  dateInput.value = todayStr();
+
+  function applyTwoHandsDefault(){
+    const name = exInput.value;
+    twoHandsInput.checked = !!TWO_HANDS_DEFAULT[name];
+    updatePreview();
+  }
+  function populateExercises(){
+    const list = EXERCISES[dayInput.value] || [];
+    exInput.innerHTML = list.map(e => `<option value="${e}">${e}</option>`).join('');
+    customWrap.style.display = exInput.value === 'Custom…' ? 'block' : 'none';
+    applyTwoHandsDefault();
+  }
+  function updatePreview(){
+    const kg = parseFloat(kgInput.value);
+    const reps = parseInt(repsInput.value, 10);
+    const sets = parseInt(setsInput.value, 10) || 1;
+    if(isNaN(kg) || isNaN(reps)){ volPreview.textContent = ''; return; }
+    const hands = twoHandsInput.checked ? 2 : 1;
+    volPreview.textContent = `= ${fmt(kg)}kg × ${hands} × ${reps} reps × ${sets} set${sets===1?'':'s'} = ${fmt(kg * hands * reps * sets)}kg total`;
+  }
+  dayInput.addEventListener('change', populateExercises);
+  exInput.addEventListener('change', () => {
+    customWrap.style.display = exInput.value === 'Custom…' ? 'block' : 'none';
+    applyTwoHandsDefault();
+  });
+  twoHandsInput.addEventListener('change', updatePreview);
+  kgInput.addEventListener('input', updatePreview);
+  repsInput.addEventListener('input', updatePreview);
+  setsInput.addEventListener('input', updatePreview);
+  populateExercises();
+
+  let entries = [];
+  const STORAGE_KEY = 'trainingLogBookEntries';
+
+  function loadEntries(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      entries = raw ? JSON.parse(raw) : [];
+    }catch(e){
+      entries = [];
+      console.error('Local storage read failed — private/incognito mode blocks this. Use Export/Import CSV instead.', e);
+    }
+    render();
+  }
+
+  function saveEntries(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }catch(e){
+      console.error('Local storage save failed — private/incognito mode or storage full. Use Export CSV to back up manually.', e);
+      const msg = document.getElementById('importMsg');
+      if(msg) msg.textContent = 'Warning: this browser blocked local saving — export a CSV backup now.';
+    }
+  }
+
+  function fmt(n){
+    return Number(n).toLocaleString(undefined, {maximumFractionDigits:1});
+  }
+
+  function addEntry(){
+    const date = dateInput.value || todayStr();
+    const day = dayInput.value;
+    let exercise = exInput.value;
+    if(exercise === 'Custom…'){
+      exercise = (customInput.value || '').trim();
+      if(!exercise){ customInput.focus(); return; }
+    }
+    const kg = parseFloat(kgInput.value);
+    const reps = parseInt(repsInput.value, 10);
+    const sets = parseInt(setsInput.value, 10) || 1;
+    if(isNaN(kg) || kg < 0 || isNaN(reps) || reps <= 0 || sets <= 0){
+      kgInput.focus();
+      return;
+    }
+    const hands = twoHandsInput.checked ? 2 : 1;
+    entries.push({
+      id: Date.now() + '-' + Math.random().toString(36).slice(2,7),
+      date, day, exercise, kg, hands, reps, sets, volume: kg * hands * reps * sets
+    });
+    kgInput.value = ''; repsInput.value = ''; setsInput.value = '1';
+    if(exInput.value === 'Custom…') customInput.value = '';
+    applyTwoHandsDefault();
+    updatePreview();
+    saveEntries();
+    render();
+  }
+
+  function deleteEntry(id){
+    entries = entries.filter(e => e.id !== id);
+    saveEntries();
+    render();
+  }
+
+  $('btnAdd').addEventListener('click', addEntry);
+
+  // ============ CSV EXPORT ============
+  function csvEscape(val){
+    const s = String(val);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  function exportCSV(){
+    const header = ['date','day','exercise','kg_per_hand','hands','reps','sets','total_kg'];
+    const rows = [...entries].sort((a,b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+    const lines = [header.join(',')];
+    rows.forEach(e => {
+      lines.push([e.date, e.day, csvEscape(e.exercise), e.kg, e.hands || 1, e.reps, e.sets || 1, e.volume].join(','));
+    });
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = todayStr();
+    a.href = url;
+    a.download = 'training-log-backup-' + stamp + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  $('btnExport').addEventListener('click', exportCSV);
+
+  // ============ CSV IMPORT ============
+  function parseCSVLine(line){
+    const out = [];
+    let cur = '', inQuotes = false;
+    for(let i = 0; i < line.length; i++){
+      const c = line[i];
+      if(inQuotes){
+        if(c === '"'){
+          if(line[i+1] === '"'){ cur += '"'; i++; }
+          else inQuotes = false;
+        } else cur += c;
+      } else {
+        if(c === '"') inQuotes = true;
+        else if(c === ','){ out.push(cur); cur = ''; }
+        else cur += c;
+      }
+    }
+    out.push(cur);
+    return out;
+  }
+
+  function importCSV(file){
+    const msg = $('importMsg');
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      try{
+        const text = evt.target.result;
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length);
+        if(lines.length < 2){ msg.textContent = 'No rows found in file.'; return; }
+        const header = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+        const idx = {
+          date: header.indexOf('date'), day: header.indexOf('day'), exercise: header.indexOf('exercise'),
+          kg: header.indexOf('kg_per_hand'), hands: header.indexOf('hands'), reps: header.indexOf('reps'),
+          sets: header.indexOf('sets'), volume: header.indexOf('total_kg')
+        };
+        if(idx.date === -1 || idx.exercise === -1 || idx.kg === -1 || idx.reps === -1){
+          msg.textContent = 'Unrecognized CSV format — expected the exported column headers.';
+          return;
+        }
+        let added = 0;
+        for(let i = 1; i < lines.length; i++){
+          const cols = parseCSVLine(lines[i]);
+          const date = (cols[idx.date] || '').trim();
+          const day = (cols[idx.day] || '').trim();
+          const exercise = (cols[idx.exercise] || '').trim();
+          const kg = parseFloat(cols[idx.kg]);
+          const hands = idx.hands !== -1 ? (parseInt(cols[idx.hands], 10) || 1) : 1;
+          const reps = parseInt(cols[idx.reps], 10);
+          const sets = idx.sets !== -1 ? (parseInt(cols[idx.sets], 10) || 1) : 1;
+          if(!date || !exercise || isNaN(kg) || isNaN(reps)) continue;
+          const volume = idx.volume !== -1 && !isNaN(parseFloat(cols[idx.volume]))
+            ? parseFloat(cols[idx.volume]) : kg * hands * reps * sets;
+          entries.push({
+            id: Date.now() + '-' + Math.random().toString(36).slice(2,7) + '-' + i,
+            date, day: day || 'Upper A', exercise, kg, hands, reps, sets, volume
+          });
+          added++;
+        }
+        saveEntries();
+        render();
+        msg.textContent = added + ' set' + (added === 1 ? '' : 's') + ' imported and merged into your log.';
+      }catch(err){
+        msg.textContent = 'Could not read that file — make sure it is a CSV exported from this log book.';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  $('inImport').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    if(file) importCSV(file);
+    e.target.value = '';
+  });
+
+  function render(){
+    // Grand total
+    const grand = entries.reduce((s,e) => s + e.volume, 0);
+    const totalSets = entries.reduce((s,e) => s + (e.sets || 1), 0);
+    $('grandTotal').innerHTML = fmt(grand) + '<span>kg</span>';
+    $('grandMeta').textContent = totalSets + ' set' + (totalSets === 1 ? '' : 's') + ' logged';
+
+    // Day-type cards
+    const dayTotals = {"Upper A":{kg:0,sets:0},"Lower A":{kg:0,sets:0},"Upper B":{kg:0,sets:0},"Lower B":{kg:0,sets:0}};
+    entries.forEach(e => {
+      if(!dayTotals[e.day]) dayTotals[e.day] = {kg:0,sets:0};
+      dayTotals[e.day].kg += e.volume;
+      dayTotals[e.day].sets += (e.sets || 1);
+    });
+    $('dayTypeCards').innerHTML = Object.keys(dayTotals).map(d => `
+      <div class="card">
+        <div class="day-tag">${d}</div>
+        <div class="kg">${fmt(dayTotals[d].kg)}<small>kg</small></div>
+        <div class="meta">${dayTotals[d].sets} sets logged</div>
+      </div>
+    `).join('');
+
+    // Per exercise
+    const byEx = {};
+    entries.forEach(e => {
+      if(!byEx[e.exercise]) byEx[e.exercise] = {kg:0, sets:0, day:e.day, last:e.date};
+      byEx[e.exercise].kg += e.volume;
+      byEx[e.exercise].sets += (e.sets || 1);
+      if(e.date > byEx[e.exercise].last) byEx[e.exercise].last = e.date;
+      byEx[e.exercise].day = e.day;
+    });
+    const exRows = Object.keys(byEx).sort((a,b) => byEx[b].kg - byEx[a].kg);
+    $('exerciseBody').innerHTML = exRows.length ? exRows.map(name => {
+      const r = byEx[name];
+      return `<tr><td>${name}</td><td><span class="daytype ${DAY_CLASS[r.day]||''}">${r.day}</span></td><td class="num">${r.sets}</td><td class="vol">${fmt(r.kg)} kg</td><td class="num">${r.last}</td></tr>`;
+    }).join('') : '<tr><td class="empty" colspan="5">No sets logged yet.</td></tr>';
+
+    // Per date
+    const byDate = {};
+    entries.forEach(e => {
+      if(!byDate[e.date]) byDate[e.date] = {kg:0, sets:0, days:new Set()};
+      byDate[e.date].kg += e.volume;
+      byDate[e.date].sets += (e.sets || 1);
+      byDate[e.date].days.add(e.day);
+    });
+    const dateRows = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+    $('dateBody').innerHTML = dateRows.length ? dateRows.map(d => {
+      const r = byDate[d];
+      const dayLabel = [...r.days].join(' / ');
+      const cls = r.days.size === 1 ? (DAY_CLASS[[...r.days][0]]||'') : '';
+      return `<tr><td class="num">${d}</td><td><span class="daytype ${cls}">${dayLabel}</span></td><td class="num">${r.sets}</td><td class="vol">${fmt(r.kg)} kg</td></tr>`;
+    }).join('') : '<tr><td class="empty" colspan="4">No sets logged yet.</td></tr>';
+
+    // Raw log
+    const sorted = [...entries].sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    $('logBody').innerHTML = sorted.length ? sorted.map(e => `
+      <tr>
+        <td class="num">${e.date}</td>
+        <td><span class="daytype ${DAY_CLASS[e.day]||''}">${e.day}</span></td>
+        <td>${e.exercise}</td>
+        <td class="num">${fmt(e.kg)}</td>
+        <td class="num">${e.hands || 1}×</td>
+        <td class="num">${e.reps}</td>
+        <td class="num">${e.sets || 1}</td>
+        <td class="vol">${fmt(e.volume)}</td>
+        <td><button class="btn ghost small" onclick="window.__deleteEntry('${e.id}')">Delete</button></td>
+      </tr>
+    `).join('') : '<tr><td class="empty" colspan="9">No sets logged yet — add your first set above.</td></tr>';
+  }
+
+  window.__deleteEntry = deleteEntry;
+
+  loadEntries();
+})();
+</script>
+</body>
+</html>
